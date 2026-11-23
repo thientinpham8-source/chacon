@@ -10,6 +10,8 @@
 - `physics.js`: bộ vật lý, CSS 3D và canvas; đã bao gồm bản đóng gói của thư viện `cannon-es`.
 - `server.js`: máy chủ Node.js không cần thư viện phụ trợ, cung cấp API và đồng bộ giữa các thiết bị.
 - `build.js`: biên dịch `app.jsx` và nhúng mã, CSS, vật lý vào `index.html`.
+- `functions/`: Firebase Functions API, lưu trạng thái và xác thực trong Firestore.
+- `firebase.json`, `firestore.rules`: cấu hình Firebase Hosting, Functions và khóa truy cập Firestore trực tiếp từ trình duyệt.
 - `package.json`, `package-lock.json`: thông tin các thư viện dùng để biên dịch.
 
 ## Mở nhanh trên một thiết bị
@@ -32,6 +34,21 @@ Máy chủ lưu trạng thái và bản ghi âm trong `data/`. Thư mục này k
 
 **Bảo mật:** Đây là máy chủ thử nghiệm cho gia đình, không phải hệ thống bảo mật hoàn chỉnh. Ai truy cập được đường dẫn máy chủ cũng có thể đọc nhật ký và thực hiện các thao tác ở trang con; PIN chỉ bảo vệ các thao tác quản trị. Không đưa trực tiếp lên Internet công khai khi chưa bổ sung xác thực truy cập, HTTPS, bảo vệ chống dò PIN và các biện pháp bảo mật phù hợp.
 
+## Triển khai Firebase và Firestore
+
+Ứng dụng dùng Firebase Hosting cho trang web, Cloud Functions cho API và Firestore để lưu lịch sử. Chọn khu vực Firestore **Singapore (`asia-southeast1`)** khi tạo database; khu vực database không thể đổi sau khi tạo. Dùng chế độ production. Các quy tắc trong `firestore.rules` chặn truy cập Firestore từ trình duyệt; API truy cập dữ liệu bằng quyền máy chủ.
+
+Cloud Functions cần bật gói Firebase **Blaze** (có thể phát sinh chi phí theo mức sử dụng). Sau khi tạo database:
+
+```bash
+npm ci
+npm run build
+npx firebase-tools login
+npx firebase-tools deploy
+```
+
+Chạy các lệnh trong thư mục dự án. Cấu hình Web SDK (`apiKey`, `appId`, v.v.) không cần thêm vào mã vì trang gọi API cùng origin; không bao giờ tải lên service-account key. Sau khi triển khai, mở `https://chacon-f44d8.web.app/?admin`, đăng nhập bằng PIN mặc định `1234` rồi đổi PIN. Mục **Liên kết truy cập** tạo link riêng cho con; giữ link đó riêng tư vì nó cho phép xem và ghi nhật ký mà không cần đăng nhập. Link `?admin` yêu cầu PIN. Dữ liệu cũ chỉ lưu trong trình duyệt/GitHub Pages không tự chuyển sang Firestore.
+
 **Ghi âm:** Trình duyệt thường yêu cầu HTTPS hoặc localhost và quyền dùng microphone. Truy cập bằng địa chỉ IP qua HTTP trên thiết bị khác có thể không ghi âm được. Trình xem nhúng cũng có thể chặn microphone.
 
 **Góc vẽ:** Tranh lưu trên thiết bị/trình duyệt vẽ, không tự gửi hoặc đồng bộ cho cha. Có nút tải tranh PNG; việc tải xuống có thể bị chặn trong trình xem nhúng.
@@ -45,6 +62,6 @@ npm ci
 npm run build
 ```
 
-Lệnh trên tạo lại `index.html` từ `app.jsx`, `styles.css` và `physics.js`, bao gồm React và các thư viện giao diện trong trang. Không cần chạy lệnh này nếu chỉ muốn dùng `index.html` đã có sẵn. Sau đó chạy `node server.js` nếu cần đồng bộ.
+Lệnh trên tạo lại `index.html` và `public/index.html` từ `app.jsx`, `styles.css` và `physics.js`, bao gồm React và các thư viện giao diện trong trang. Không cần chạy lệnh này nếu chỉ muốn dùng `index.html` đã có sẵn. Sau đó chạy `node server.js` nếu cần đồng bộ.
 
 Thư viện bên thứ ba được sử dụng gồm React, React DOM, react-kawaii và cannon-es; xem giấy phép tương ứng trong các gói thư viện khi phân phối lại.

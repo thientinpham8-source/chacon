@@ -22,11 +22,15 @@ async function main() {
   const inline = text => text.replace(/<\/script/gi, '<\\/script');
   const html = '<!doctype html>\n<html lang="vi"><head><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">' +
+    '<meta name="referrer" content="no-referrer">' +
     '<meta name="theme-color" content="#fff8ee"><title>Nhật ký cha &amp; con</title>' +
     '<style>' + css + '</style></head><body><div id="root"></div>' +
     '<script>' + inline(physics) + '</script><script>' + inline(app) + '</script>' +
     '</body></html>';
   fs.writeFileSync(path.join(dir, 'index.html'), html);
+  const publicDir = path.join(dir, 'public');
+  fs.mkdirSync(publicDir, { recursive: true });
+  fs.writeFileSync(path.join(publicDir, 'index.html'), html);
   console.log('Đã tạo index.html (trang độc lập, không cần CDN).');
 }
 
